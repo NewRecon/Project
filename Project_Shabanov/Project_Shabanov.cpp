@@ -8,7 +8,6 @@ using namespace std;
 
 #define random(min,max) min+rand()%(max+1-min)
 
-
 /*
 	Реализовать не через массив cells, а через сумму (сумма будет не в структуре)
 	Реализовать проверку, что сумма меньше 30
@@ -29,11 +28,9 @@ int cells = 0;
 // Размер массива структур
 int size1;
 
-//	Прототипы
-
-
 struct Storage
 {
+	int cell;
 	int num;
 	int weight;
 	int shelf_life;
@@ -42,17 +39,29 @@ struct Storage
 	string recipient;
 	struct Date
 	{
-		int day = 0;
-		int month = 1;
-		int year = 2022;
+		int day = 1;
+		int month =1 ;
+		int year = 1;
 	} date;
 };
 
+//	Прототипы
+void writeInFile(Storage*& stock, int num, string path);
+string createAdress(string path);
+int searchIndex(Storage*& stock, int num);
+void increaseDate(Storage*& stock, int num);
+void addInStock(Storage*& stock, Storage pos);
+void delInStock(Storage*& stock, int num);
+void createNewPos(Storage*& stock, int num, string path);
+void delivPos(Storage*& stock, int num);
+void newDay(Storage*& stock);
+
 //	Запись в текстовый файл
-void writeInFile(Storage pos, string path= "C:\\Users\\99max\\Desktop\\IT\\C++\\Project\\Data\\Project_Data.txt")
+void writeInFile(Storage*& stock, int num, string path= "C:\\Users\\99max\\Desktop\\IT\\C++\\Project\\Data\\Project_Data.txt")
 {
+	int i = searchIndex(stock, num);
 	ofstream out{ path, ios::app };
-	out << pos.num << "|" << pos.weight << "|" << pos.status << "|" << pos.sender << "|" << pos.recipient << "|" << pos.date.day << "." << pos.date.month << "." << pos.date.year << "|" << pos.shelf_life << endl;
+	out << cells << " - " << stock[i].num << "|" << stock[i].weight << "|" << stock[i].status << "|" << stock[i].sender << "|" << stock[i].recipient << "|" << stock[i].date.day << "." << stock[i].date.month << "." << stock[i].date.year << "|" << stock[i].shelf_life << " - " << stock[i].cell << endl;
 	out.close();
 }
 
@@ -75,6 +84,63 @@ string createAdress(string path = "C:\\Users\\99max\\Desktop\\IT\\C++\\Project\\
 	return adress;
 }
 
+// нахождение индекса экземпляра по номеру
+int searchIndex(Storage*& stock, int num)
+{
+	int index = 0;
+	for (int i = 0; i < size1; i++)
+	{
+		if (stock[i].num == num)
+		{
+			index = i;
+			break;
+		}
+	}
+	return index;
+}
+
+// Увеличение даты
+void increaseDate(Storage*& stock, int num)
+{
+	if (size1 == 1)
+	{
+		stock[0].date.day = 1;
+		stock[0].date.month = 1;
+		stock[0].date.year = 2022;
+	}
+	else
+	{
+		int i = searchIndex(stock, num);
+		if (stock[i - 1].date.day == 30 && (stock[i - 1].date.month == 4 || stock[i - 1].date.month == 6 || stock[i - 1].date.month == 9 || stock[i - 1].date.month == 11))
+		{
+			stock[i].date.day = 1;
+			stock[i].date.month = stock[i - 1].date.month + 1;
+		}
+		else if (stock[i - 1].date.day == 31 && (stock[i - 1].date.month == 1 || stock[i - 1].date.month == 3 || stock[i - 1].date.month == 5 || stock[i - 1].date.month == 7 || stock[i - 1].date.month == 8 || stock[ - 1].date.month == 10))
+		{
+			stock[i].date.day = 1;
+			stock[i].date.month = stock[i - 1].date.month + 1;
+		}
+		else if (stock[i - 1].date.day == 28 && stock[i - 1].date.month == 2)
+		{
+			stock[i].date.day = 1;
+			stock[i].date.month = stock[i - 1].date.month + 1;
+		}
+		else if (stock[i - 1].date.day == 31 && stock[i - 1].date.month == 12)
+		{
+			stock[i].date.day = 1;
+			stock[i].date.month = 1;
+			stock[i].date.year = stock[i - 1].date.year + 1;
+		}
+		else
+		{
+			stock[i].date.day = stock[i - 1].date.day + 1;
+			stock[i].date.month = stock[i - 1].date.month;
+			stock[i].date.year = stock[i - 1].date.year;
+		}
+	}
+}
+
 // Добавление в массив структур
 void addInStock(Storage*& stock, Storage pos)
 {
@@ -90,17 +156,9 @@ void addInStock(Storage*& stock, Storage pos)
 }
 
 // Удаление из массива структур
-void delInStock(Storage*& stock, int num)
+void delInStock(Storage*& stock, int num)				// При удалении остаётся мусор!
 {
-	int index = 0;
-	for (int i = 0; i < size1; i++)
-	{
-		if (stock[i].num == num)
-		{
-			index = i;
-			break;
-		}
-	}
+	int index = searchIndex(stock, num);
 	Storage* buf = new Storage[size1 - 1];
 	for (int i = 0; i < index; i++)
 	{
@@ -126,7 +184,8 @@ void createNewPos(Storage*& stock, int num, string path = "C:\\Users\\99max\\Des
 	{
 		if (cells + 1 <= 30)
 		{
-			cells += 1;
+			pos.cell = 1;
+			cells += pos.cell;
 			flag = false;
 		}
 	}
@@ -134,7 +193,8 @@ void createNewPos(Storage*& stock, int num, string path = "C:\\Users\\99max\\Des
 	{
 		if (cells + 2 <= 30)
 		{
-			cells += 2;
+			pos.cell = 2;
+			cells += pos.cell;
 			flag = false;
 		}
 	}
@@ -142,52 +202,51 @@ void createNewPos(Storage*& stock, int num, string path = "C:\\Users\\99max\\Des
 	{
 		if (cells + 3 <= 30)
 		{
-			cells += 3;
+			pos.cell = 3;
+			cells += pos.cell;
 			flag = false;
 		}
 	}
 	if (flag)
 	{
-		// возврат товара
+		pos.status = "Нет места (возврат)";
+		pos.sender = createAdress();
+		pos.recipient = createAdress();
+		//increaseDate(stock, num);
+		pos.shelf_life = random(3, 20);
+		writeInFile(stock, num);
 	}
 	else
 	{
 		pos.status = "на складе";
 		pos.sender = createAdress();
 		pos.recipient = createAdress();
-		pos.date.day++;							// сделать условием увеличение месяца и года
 		pos.shelf_life = random(3, 20);
 		addInStock(stock, pos);
-		writeInFile(pos);
+		//increaseDate(stock,num);
+		writeInFile(stock, num);
 	}
 }
 
 // доставка заказа
 void delivPos(Storage*& stock, int num)
 {
-	int index = 0;
-	for (int i = 0; i < size1; i++)
-	{
-		if (stock[i].num == num)
-		{
-			index = i;
-			break;
-		}
-	}
+	int index = searchIndex(stock, num);
 	stock[index].status = "выдан";
-	writeInFile(stock[index]);
+	cells -= stock[index].cell;
+	writeInFile(stock, num);
 	delInStock(stock, num);
 }
 
 // симуляцтя нового дня
 void newDay(Storage*& stock)
 {
-	int num = random(1, 30);	// ищет рандомную позицию, и если не находит то создаёт ее, иначе производит выдачу
+	int num = random(1, 50);	// ищет рандомную позицию, и если не находит то создаёт ее, иначе производит выдачу
 	bool flag=true;
 	int index;
 	for (int i = 0; i < size1; i++)
 	{
-		if (stock[i].num == num)
+		if (stock[i].num == num)			// Если номер присвоен после выдачи какой-либо позиции, то он этот номер не находит в массиве
 		{
 			flag = false;
 			index = i;								// Функция определения индекса по номеру??? Дальше передавать индекс???
@@ -215,11 +274,10 @@ int main()
 	string pathToAdress = "C:\\Users\\99max\\Desktop\\IT\\C++\\Project\\Data\\Addresses.txt";
 	size1 = 0;
 	Storage* stock = new Storage[size1];
-	int z;
-	while (true)
+	int z=0;
+	while (z!=40)
 	{
 		newDay(stock);
-		cin >> z;
-		if (z == 0) break;
+		z++;
 	}
 }
