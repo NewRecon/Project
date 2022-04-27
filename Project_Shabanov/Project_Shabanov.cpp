@@ -28,6 +28,9 @@ int cells = 0;
 // Размер массива структур
 int size1;
 
+string pathToData = "..\\Data\\Project_Data.txt";
+string pathToAdress = "..\\Data\\Addresses.txt";
+
 struct Storage
 {
 	int cell;
@@ -39,9 +42,9 @@ struct Storage
 	string recipient;
 	struct Date
 	{
-		int day = 1;
-		int month =1 ;
-		int year = 1;
+		int day;
+		int month;
+		int year;
 	} date;
 };
 
@@ -57,7 +60,7 @@ void delivPos(Storage*& stock, int num);
 void newDay(Storage*& stock);
 
 //	Запись в текстовый файл
-void writeInFile(Storage*& stock, int num, string path= "C:\\Users\\99max\\Desktop\\IT\\C++\\Project\\Data\\Project_Data.txt")
+void writeInFile(Storage*& stock, int num, string path = pathToData)
 {
 	int i = searchIndex(stock, num);
 	ofstream out{ path, ios::app };
@@ -66,7 +69,7 @@ void writeInFile(Storage*& stock, int num, string path= "C:\\Users\\99max\\Deskt
 }
 
 //	Создание адреса из базы адресов
-string createAdress(string path = "C:\\Users\\99max\\Desktop\\IT\\C++\\Project\\Data\\Addresses.txt")
+string createAdress(string path = pathToAdress)
 {
 	string str, adress;
 	int n = 1 + rand() % 50;
@@ -151,6 +154,7 @@ void addInStock(Storage*& stock, Storage pos)
 	}
 	buf[size1] = pos;
 	delete[]stock;
+	stock = nullptr;
 	stock = buf;
 	size1++;
 }
@@ -169,12 +173,13 @@ void delInStock(Storage*& stock, int num)				// При удалении остаётся мусор!
 		buf[i-1] = stock[i];
 	}
 	delete[]stock;
+	stock = nullptr;
 	stock = buf;
 	size1--;
 }
 
 //	Создание новой позиции
-void createNewPos(Storage*& stock, int num, string path = "C:\\Users\\99max\\Desktop\\IT\\C++\\Project\\Data\\Project_Data.txt")
+void createNewPos(Storage*& stock, int num, string path = pathToData)
 {
 	Storage pos;
 	pos.num = num;
@@ -223,7 +228,7 @@ void createNewPos(Storage*& stock, int num, string path = "C:\\Users\\99max\\Des
 		pos.recipient = createAdress();
 		pos.shelf_life = random(3, 20);
 		addInStock(stock, pos);
-		//increaseDate(stock,num);
+		increaseDate(stock,num);
 		writeInFile(stock, num);
 	}
 }
@@ -241,7 +246,7 @@ void delivPos(Storage*& stock, int num)
 // симуляцтя нового дня
 void newDay(Storage*& stock)
 {
-	int num = random(1, 50);	// ищет рандомную позицию, и если не находит то создаёт ее, иначе производит выдачу
+	int num = random(1, 30);	// ищет рандомную позицию, и если не находит то создаёт ее, иначе производит выдачу
 	bool flag=true;
 	int index;
 	for (int i = 0; i < size1; i++)
@@ -249,7 +254,7 @@ void newDay(Storage*& stock)
 		if (stock[i].num == num)			// Если номер присвоен после выдачи какой-либо позиции, то он этот номер не находит в массиве
 		{
 			flag = false;
-			index = i;								// Функция определения индекса по номеру??? Дальше передавать индекс???
+			index = i;
 			break;
 		}
 	}
@@ -270,12 +275,10 @@ int main()
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
 	srand(time(NULL));
-	string pathToData = "C:\\Users\\99max\\Desktop\\IT\\C++\\Project\\Data\\Project_Data.txt";
-	string pathToAdress = "C:\\Users\\99max\\Desktop\\IT\\C++\\Project\\Data\\Addresses.txt";
 	size1 = 0;
 	Storage* stock = new Storage[size1];
 	int z=0;
-	while (z!=40)
+	while (z!=50)
 	{
 		newDay(stock);
 		z++;
