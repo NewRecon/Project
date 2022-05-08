@@ -37,6 +37,7 @@ struct Storage
 	int num;
 	int weight;
 	int shelf_life;
+	int countSL;
 	string status;
 	string sender;
 	string recipient;
@@ -46,6 +47,13 @@ struct Storage
 		int month;
 		int year;
 	} date;
+};
+
+struct Date
+{
+	int day;
+	int month;
+	int year;
 };
 
 //	Прототипы
@@ -60,11 +68,10 @@ void delivPos(Storage*& stock, int num);
 void newDay(Storage*& stock);
 
 //	Запись в текстовый файл
-void writeInFile(Storage*& stock, int num, string path = pathToData)
+void writeInFile(Storage& pos, Date& d, string path = pathToData)
 {
-	int i = searchIndex(stock, num);
 	ofstream out{ path, ios::app };
-	out << cells << " - " << stock[i].num << "|" << stock[i].weight << "|" << stock[i].status << "|" << stock[i].sender << "|" << stock[i].recipient << "|" << stock[i].date.day << "." << stock[i].date.month << "." << stock[i].date.year << "|" << stock[i].shelf_life << " - " << stock[i].cell << endl;
+	out << "Дата: " << d.day << "." << d.month << "." << d.year << " : " << cells << " - " << pos.num << "|" << pos.weight << "|" << pos.status << "|" << pos.sender << "|" << pos.recipient << "|" << pos.date.day << "." << pos.date.month << "." << pos.date.year << "|" << pos.shelf_life << " - " << pos.cell << endl;
 	out.close();
 }
 
@@ -103,44 +110,29 @@ int searchIndex(Storage*& stock, int num)
 }
 
 // Увеличение даты
-void increaseDate(Storage*& stock, int num)
+void incraseDate(Date& d)
 {
-	if (size1 == 1)
+	d.day++;
+	if (d.day > 30 && (d.month == 4 || d.month == 6 || d.month == 9 || d.month == 11))
 	{
-		stock[0].date.day = 1;
-		stock[0].date.month = 1;
-		stock[0].date.year = 2022;
+		d.day = 1;
+		d.month++;
 	}
-	else
+	else if (d.day > 31 && (d.month == 1 || d.month == 3 || d.month == 5 || d.month == 7 || d.month == 8 || d.month == 10))
 	{
-		int i = searchIndex(stock, num);
-		if (stock[i - 1].date.day == 30 && (stock[i - 1].date.month == 4 || stock[i - 1].date.month == 6 || stock[i - 1].date.month == 9 || stock[i - 1].date.month == 11))
-		{
-			stock[i].date.day = 1;
-			stock[i].date.month = stock[i - 1].date.month + 1;
-		}
-		else if (stock[i - 1].date.day == 31 && (stock[i - 1].date.month == 1 || stock[i - 1].date.month == 3 || stock[i - 1].date.month == 5 || stock[i - 1].date.month == 7 || stock[i - 1].date.month == 8 || stock[ - 1].date.month == 10))
-		{
-			stock[i].date.day = 1;
-			stock[i].date.month = stock[i - 1].date.month + 1;
-		}
-		else if (stock[i - 1].date.day == 28 && stock[i - 1].date.month == 2)
-		{
-			stock[i].date.day = 1;
-			stock[i].date.month = stock[i - 1].date.month + 1;
-		}
-		else if (stock[i - 1].date.day == 31 && stock[i - 1].date.month == 12)
-		{
-			stock[i].date.day = 1;
-			stock[i].date.month = 1;
-			stock[i].date.year = stock[i - 1].date.year + 1;
-		}
-		else
-		{
-			stock[i].date.day = stock[i - 1].date.day + 1;
-			stock[i].date.month = stock[i - 1].date.month;
-			stock[i].date.year = stock[i - 1].date.year;
-		}
+		d.day = 1;
+		d.month++;
+	}
+	else if (d.day > 28 && d.month == 2)
+	{
+		d.day = 1;
+		d.month++;
+	}
+	else if (d.day > 31 && d.month == 12)
+	{
+		d.day = 1;
+		d.month = 1;
+		d.year++;
 	}
 }
 
@@ -154,13 +146,12 @@ void addInStock(Storage*& stock, Storage pos)
 	}
 	buf[size1] = pos;
 	delete[]stock;
-	stock = nullptr;
 	stock = buf;
 	size1++;
 }
 
 // Удаление из массива структур
-void delInStock(Storage*& stock, int num)				// При удалении остаётся мусор!
+void delInStock(Storage*& stock, int num)
 {
 	int index = searchIndex(stock, num);
 	Storage* buf = new Storage[size1 - 1];
@@ -168,18 +159,17 @@ void delInStock(Storage*& stock, int num)				// При удалении остаётся мусор!
 	{
 		buf[i] = stock[i];
 	}
-	for (int i = index + 1; i < size1-1; i++)
+	for (int i = index + 1; i < size1; i++)
 	{
 		buf[i-1] = stock[i];
 	}
 	delete[]stock;
-	stock = nullptr;
 	stock = buf;
 	size1--;
 }
 
 //	Создание новой позиции
-void createNewPos(Storage*& stock, int num, string path = pathToData)
+void createNewPos(Storage*& stock, Date& d, int num, string path = pathToData)
 {
 	Storage pos;
 	pos.num = num;
@@ -217,9 +207,11 @@ void createNewPos(Storage*& stock, int num, string path = pathToData)
 		pos.status = "Нет места (возврат)";
 		pos.sender = createAdress();
 		pos.recipient = createAdress();
-		//increaseDate(stock, num);
+		pos.date.day = d.day;
+		pos.date.month = d.month;
+		pos.date.year = d.year;
 		pos.shelf_life = random(3, 20);
-		writeInFile(stock, num);
+		writeInFile(pos, d);
 	}
 	else
 	{
@@ -227,24 +219,43 @@ void createNewPos(Storage*& stock, int num, string path = pathToData)
 		pos.sender = createAdress();
 		pos.recipient = createAdress();
 		pos.shelf_life = random(3, 20);
+		pos.countSL = pos.shelf_life;		// ?
+		pos.date.day = d.day;
+		pos.date.month = d.month;
+		pos.date.year = d.year;
 		addInStock(stock, pos);
-		increaseDate(stock,num);
-		writeInFile(stock, num);
+		writeInFile(pos, d);
 	}
 }
 
 // доставка заказа
-void delivPos(Storage*& stock, int num)
+void delivPos(Storage*& stock, Date& d, int num)
 {
 	int index = searchIndex(stock, num);
 	stock[index].status = "выдан";
 	cells -= stock[index].cell;
-	writeInFile(stock, num);
+	writeInFile(stock[index], d);
 	delInStock(stock, num);
 }
 
+// Уменьшение срока хранения
+void decreaseShelfLife(Storage*& stock, Date& d, string path = pathToData)
+{
+	for (int i = 0; i < size1; i++)
+	{
+		stock[i].countSL--;
+		if (stock[i].countSL == 0)
+		{
+			stock[i].status = "возврат (истёк срок хранения)";
+			cells -= stock[i].cell;
+			writeInFile(stock[i], d);
+			delInStock(stock, i);
+		}
+	}
+}
+
 // симуляцтя нового дня
-void newDay(Storage*& stock)
+void newDay(Storage*& stock, Date& d, string path = pathToData)
 {
 	int num = random(1, 30);	// ищет рандомную позицию, и если не находит то создаёт ее, иначе производит выдачу
 	bool flag=true;
@@ -260,12 +271,14 @@ void newDay(Storage*& stock)
 	}
 	if (flag)
 	{
-		createNewPos(stock, num);
+		createNewPos(stock, d, num);
 	}
 	else
 	{
-		delivPos(stock, num);
+		delivPos(stock, d, num);
 	}
+	incraseDate(d);
+	decreaseShelfLife(stock, d);
 }
 
 //Реализовать сортировку массива ячеек и сделать проверку на вмещаемость нового товара (в функции 3 разных цикла в зависимости от того, какго веса товар)
@@ -276,11 +289,12 @@ int main()
 	SetConsoleOutputCP(1251);
 	srand(time(NULL));
 	size1 = 0;
+	Date d {1,1,2022};
 	Storage* stock = new Storage[size1];
 	int z=0;
-	while (z!=50)
+	while (z!=370)
 	{
-		newDay(stock);
+		newDay(stock, d);
 		z++;
 	}
 }
