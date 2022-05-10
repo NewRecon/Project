@@ -15,9 +15,11 @@ int cells = 0;
 // Размер массива структур
 int size1;
 
+// Директории текстовых файлов
 string pathToData = "..\\Data\\Project_Data.txt";
 string pathToAdress = "..\\Data\\Addresses.txt";
 
+// Структуры
 struct Storage
 {
 	int cell;
@@ -40,7 +42,7 @@ struct Date
 	int year;
 };
 
-//	Прототипы
+// Прототипы
 void writeInFile(Storage*& stock, int num, string path);
 string createAdress(string path);
 void increaseDate(Storage*& stock, int num);
@@ -54,7 +56,7 @@ void showStock(Storage*& stock);
 void showCells();
 void showFile(string path);
 
-//	Запись в текстовый файл
+// Запись информации экземпляра в текстовый файл
 void writeInFile(Storage& pos, Date& d, string path = pathToData)
 {
 	ofstream out{ path, ios::app };
@@ -62,11 +64,11 @@ void writeInFile(Storage& pos, Date& d, string path = pathToData)
 	out.close();
 }
 
-//	Создание адреса из базы адресов
+// Создание адреса из базы адресов
 string createAdress(string path = pathToAdress)
 {
 	string str, adress;
-	int n = 1 + rand() % 50;
+	int n = random(1,50);
 	ifstream in{ path };
 	if (in.is_open())
 	{
@@ -144,7 +146,7 @@ void delInStock(Storage*& stock, int index)
 	size1--;
 }
 
-//	Создание новой позиции
+// Создание новой позиции
 void createNewPos(Storage*& stock, Date& d, int num, string path = pathToData)
 {
 	Storage pos;
@@ -206,7 +208,7 @@ void createNewPos(Storage*& stock, Date& d, int num, string path = pathToData)
 	}
 }
 
-// доставка заказа
+// Доставка(возврат) заказа
 void delivPos(Storage*& stock, Date& d, int index)
 {
 	cells -= stock[index].cell;
@@ -229,7 +231,7 @@ void decreaseShelfLife(Storage*& stock, Date& d, string path = pathToData)
 	}
 }
 
-// симуляцтя нового дня
+// Симуляция нового дня
 void newDay(Storage*& stock, Date& d, string path = pathToData)
 {
 	system("cls");
@@ -263,50 +265,42 @@ void newDay(Storage*& stock, Date& d, string path = pathToData)
 	system("pause");
 }
 
+// Вывод информации по экземпляру в консоль
 void showIvent(Storage& pos, Date& d)
 {
 	cout << pos.num << "|" << pos.weight << "|" << pos.status << "|" << pos.sender << "|" << pos.recipient << "|" << pos.day << "." << pos.month << "." << pos.year << "|" << pos.shelf_life << endl;
 }
 
-// Отоброжает текущее событие и меню
-void Menu(Storage*& stock, Date& d, int& z, string path = pathToData)
+// Отоброжает меню
+void Menu(Storage*& stock, Date& d, bool& flag, string path = pathToData)
 {
-	int n = 5;
-	while (true)
+	system("cls");
+	cout << "1 - Сгенерировать новый день." << endl;
+	cout << "2 - Отобразить все позиции на складе." << endl;
+	cout << "3 - Отобразить историю событий." << endl;
+	cout << "0 - Выход из симуляции." << endl;
+	cout << "Введите соответствующую цифру для продолжения: ";
+	int n;
+	cin >> n;
+	switch (n)
 	{
-		if (n < 0 || n > 4)
-		{
-			system("cls");
-			cout << "1 - Сгенерировать новый день." << endl;
-			cout << "2 - Отобразить все позиции на складе." << endl;
-			cout << "3 - Отобразить заполненность склада." << endl;
-			cout << "4 - Отобразить историю событий." << endl;
-			cout << "0 - Выход из симуляции." << endl;
-			cout << "Введите соответствующую цифру для продолжения: " << endl;
-			cin >> n;
-		}
-		else
-		{
-			switch (n)
-			{
-			case(1):
-				newDay(stock, d);
-				break;
-			case(2):
-				showStock(stock);
-				break;
-			case(3):
-				showCells();
-				break;
-			case(4):
-				showFile(path);
-				break;
-			case(0):
-				z = 0;
-				break;
-			}
-			break;
-		}
+	case(1):
+		newDay(stock, d);
+		break;
+	case(2):
+		showStock(stock);
+		break;
+	case(3):
+		showFile(path);
+		break;
+	case(0):
+		flag = 0;
+		break;
+	default:
+		system("cls");
+		cout << "Некорректный ввод!" << endl;;
+		system("pause");
+		break;
 	}
 }
 
@@ -316,6 +310,7 @@ void showStock(Storage*& stock)
 	system("cls");
 	if (size1 > 0)
 	{
+		cout << "Заполнено " << cells << " из 30 ячеек склада." << endl << endl;
 		for (int i = 0; i < size1; i++)
 		{
 			cout <<i+1<<". "<< stock[i].num << "|" << stock[i].weight << "|" << stock[i].status << "|" << stock[i].sender << "|" << stock[i].recipient << "|" << stock[i].day << "." << stock[i].month << "." << stock[i].year << "|" << stock[i].shelf_life << endl;
@@ -326,15 +321,7 @@ void showStock(Storage*& stock)
 	system("pause");
 }
 
-// Отобразить заполненность склада
-void showCells()
-{
-	system("cls");
-	cout << cells << " / 30";
-	cout << endl;
-	system("pause");
-}
-
+// Вывод из файла всей истории
 void showFile(string path = pathToData)
 {
 	system("cls");
@@ -353,19 +340,15 @@ void showFile(string path = pathToData)
 	system("pause");
 }
 
-int main()
+// Ручной ввод даты с проверками
+void createDate(Date& d)
 {
-	SetConsoleCP(1251);
-	SetConsoleOutputCP(1251);
-	srand(time(NULL));
-	size1 = 0;
-	Date d;
 	int date = 0;
-	while (date < 1900 || date > 2123)
+	while (date < 1970 || date > 2100)
 	{
 		system("cls");
 		cout << "Введите начальную дату." << endl;
-		cout << "Год: ";
+		cout << "Год (от 1970 до 2100): ";
 		cin >> date;
 	}
 	d.year = date;
@@ -380,7 +363,7 @@ int main()
 	}
 	d.month = date;
 	date = 0;
-	while (date < 1 || date > 31)
+	while (date < 1 || (((d.month == 1 || d.month == 3 || d.month == 5 || d.month == 7 || d.month == 8 || d.month == 10 || d.month == 12) && date > 31) || ((d.month == 4 || d.month == 6 || d.month == 9 || d.month == 11) && date > 30) || ((d.month == 2 && d.year%4==0) && date > 29) || ((d.month == 2 && d.year % 4 != 0) && date > 28)))
 	{
 		system("cls");
 		cout << "Введите начальную дату." << endl;
@@ -389,12 +372,46 @@ int main()
 		cin >> date;
 	}
 	d.day = date;
-	Storage* stock = new Storage[size1];
-	int z=1;
+}
+
+// Приветствие
+void welcome()
+{
+	cout << "В данном симуляторе продемонстрирован алгоритм работы склада." << endl << endl;
+	cout << "Имеется склад размером в 30 ячеек." << endl;
+	cout << "Каждый день генерируется случайное событие (прибытие на склад, выдача со склада, возврат)." << endl;
+	cout << "Информация по каждой позиции склада отображается в следущем виде:" << endl << endl;
+	cout << "Индивидуальный номер | вес(кг) | статус | Город отправитель | Город получатель | Дата поступления на склад | Срок хранения(дни)" << endl << endl;
+	cout << "Ячейки склада заполняются в зависимости от веса позиции:" << endl;
+	cout << "Позиция весом до 50 кг занимают 1 ячейку склада;" << endl;
+	cout << "Позиция весом от 50 до 80 кг занимают 2 ячейки склада;" << endl;
+	cout << "Позиция весом от 80 кг занимают 3 ячейки склада;" << endl << endl;
+	cout << "При нехватке места на складе товар автоматически возвращается отправителю." << endl;
+	cout << "По истечению срока хранения товар также возвращается отправителю." << endl << endl;
+	system("pause");
+}
+
+// Очистка файла
+void clearFile(string path = pathToData)
+{
 	ofstream out{ pathToData };
 	out.close();
-	while (z!=0)
+}
+
+int main()
+{
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
+	srand(time(NULL));
+	size1 = 0;
+	Date d;
+	Storage* stock = new Storage[size1];
+	clearFile();
+	welcome();
+	createDate(d);
+	bool flag = true;
+	while (flag)
 	{
-		Menu(stock, d, z);
+		Menu(stock, d, flag);
 	}
 }
