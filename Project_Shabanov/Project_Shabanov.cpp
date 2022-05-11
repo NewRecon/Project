@@ -106,6 +106,13 @@ void createNewPos(Storage*& stock, Date& d, int num, string path = pathToData)
 {
 	Storage pos;
 	pos.num = num;
+	pos.sender = createAdress();
+	pos.recipient = createAdress();
+	pos.shelf_life = random(3, 20);
+	pos.countSL = pos.shelf_life;
+	pos.day = d.day;
+	pos.month = d.month;
+	pos.year = d.year;
 	pos.weight = random(1,100);
 	bool flag = true;
 	if (pos.weight <= 50)
@@ -138,29 +145,14 @@ void createNewPos(Storage*& stock, Date& d, int num, string path = pathToData)
 	if (flag)
 	{
 		pos.status = "возврат (нет места на складе)";
-		pos.sender = createAdress();
-		pos.recipient = createAdress();
-		pos.day = d.day;
-		pos.month = d.month;
-		pos.year = d.year;
-		pos.shelf_life = random(3, 20);
-		writeInFile(pos, d);
-		showIvent(pos, d);
 	}
 	else
 	{
 		pos.status = "поступил на склад";
-		pos.sender = createAdress();
-		pos.recipient = createAdress();
-		pos.shelf_life = random(3, 20);
-		pos.countSL = pos.shelf_life;
-		pos.day = d.day;
-		pos.month = d.month;
-		pos.year = d.year;
 		addInStock(stock, pos);
-		writeInFile(pos, d);
-		showIvent(pos, d);
 	}
+	writeInFile(pos, d);
+	showIvent(pos, d);
 }
 
 // Доставка(возврат) заказа
