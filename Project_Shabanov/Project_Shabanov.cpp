@@ -5,56 +5,11 @@
 #include <ctime>
 #include <windows.h>
 using namespace std;
+#include "GlobalSet.h"
+#include "Prototypes.h"
 
 // Макросы
 #define random(min,max) min+rand()%(max+1-min)
-
-// Ячейки склада (не больше 30)
-int cells = 0;
-
-// Размер массива структур
-int size1;
-
-// Директории текстовых файлов
-string pathToData = "..\\Data\\Project_Data.txt";
-string pathToAdress = "..\\Data\\Addresses.txt";
-
-// Структуры
-struct Storage
-{
-	int cell;
-	int num;
-	int weight;
-	int shelf_life;
-	int countSL;
-	int day;
-	int month;
-	int year;
-	string status;
-	string sender;
-	string recipient;
-};
-
-struct Date
-{
-	int day;
-	int month;
-	int year;
-};
-
-// Прототипы
-void writeInFile(Storage*& stock, int num, string path);
-string createAdress(string path);
-void increaseDate(Storage*& stock, int num);
-void addInStock(Storage*& stock, Storage pos);
-void delInStock(Storage*& stock, int num);
-void createNewPos(Storage*& stock, int num, string path);
-void delivPos(Storage*& stock, int num);
-void newDay(Storage*& stock);
-void showIvent(Storage& pos, Date& d);
-void showStock(Storage*& stock);
-void showCells();
-void showFile(string path);
 
 // Запись информации экземпляра в текстовый файл
 void writeInFile(Storage& pos, Date& d, string path = pathToData)

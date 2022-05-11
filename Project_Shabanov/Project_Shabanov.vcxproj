@@ -141,6 +141,10 @@
   <ItemGroup>
     <ClCompile Include="Project_Shabanov.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GlobalSet.h" />
+    <ClInclude Include="Prototypes.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
